@@ -187,7 +187,7 @@ function App() {
                     </td>
                     ))}
                     <td style={{fontSize: "11px",textAlign: "right", backgroundColor: "black",color: "white",fontWeight:"bold"}}>
-                      {menus.filter(menu=>mapperMenu["Makanan"].includes(menu)).reduce(
+                      {menus.filter(menu=>mapperMenu["Minuman"].includes(menu)).reduce(
                         (grandTotal, menu) =>
                           grandTotal +
                           bulans.reduce(
