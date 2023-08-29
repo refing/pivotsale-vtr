@@ -27,30 +27,40 @@ function App() {
 
   const mapperMenu = {"Makanan":['Nasi Goreng', 'Mie Freno', 'Nasi Teriyaki', 'Nasi Ayam Katsu', 'Nasi Goreng Mawut'],
                   "Minuman":['Teh Hijau','Teh Lemon','Teh','Kopi Hitam','Kopi Susu']}
- 
-  const pivot = {};
-  filterTahun.forEach(penjualan=>{
-    const {tanggal,menu,total}=penjualan;
-    const bulan = tanggal.slice(5,7);
-    if(!pivot[bulan]){
-      pivot[bulan]={};
-    }
-    if(!pivot[bulan][menu]){
-      pivot[bulan][menu]=0;
-    }
-    pivot[bulan][menu] += total;
-  })
 
-  const bulans = Object.keys(pivot);
+  
+  const menus = ['Nasi Goreng', 'Mie Freno', 'Nasi Teriyaki', 'Nasi Ayam Katsu', 'Nasi Goreng Mawut','Teh Hijau','Teh Lemon','Teh','Kopi Hitam','Kopi Susu']
+  const arrbulan = [
+    "01", "02", "03", "04",
+    "05", "06", "07", "08",
+    "09", "10", "11", "12"
+  ];
   const mapperBulan = {
     "01": 'Jan', "02": 'Feb', "03": 'Mar', "04": 'Apr',
     "05": 'Mei', "06": 'Jun', "07": 'Jul', "08": 'Ags',
     "09": 'Sep', "10": 'Okt', "11": 'Nov', "12": 'Des'
   };
-  bulans.sort((a, b) => a.localeCompare(b));
-// console.log(bulans.length)
-  const menus = Array.from(new Set(filterTahun.map(penjualan => penjualan.menu)))
+
+  const pivot = {};
+  Object.keys(mapperBulan).map(key => (
+    pivot[key]={}
+  ))
+  console.log("pivot: ", pivot)
+  filterTahun.forEach(penjualan=>{
+    const {tanggal,menu,total}=penjualan;
+    const bulan = tanggal.slice(5, 7)
+    
+    if(!pivot[bulan][menu]){
+      pivot[bulan][menu]=0;
+    }
+    pivot[bulan][menu] += total;
+  })
+  console.log("pivot: ", pivot)
+
+  const bulans = Object.keys(pivot);
+  console.log(bulans)
   
+  bulans.sort((a, b) => a.localeCompare(b));
   return (
     <div className="App">
       <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
@@ -78,8 +88,7 @@ function App() {
                 <button type="button" class="btn btn-secondary m-1">JSON Transaksi</button>
                 <button type="button" class="btn btn-secondary m-1">Download Example</button>
               </div>
-                
-                
+              
               </div>
               
               <table class='table table-hover table-bordered'>
@@ -88,14 +97,16 @@ function App() {
                     <tr>
                       <th rowSpan="2" style={{fontSize: "11px", textAlign: "center", backgroundColor: "black",color: "white"}}>Menu</th>
                     
-                      <th colSpan={bulans.length} style={{fontSize: "11px",textAlign: "center", backgroundColor: "black",color: "white"}}>Periode Pada {selectTahun}</th>
+                      <th colSpan="12" style={{fontSize: "11px",textAlign: "center", backgroundColor: "black",color: "white"}}>Periode Pada {selectTahun}</th>
                   
                       <th rowSpan="2" style={{fontSize: "11px",textAlign: "center",backgroundColor: "black",color: "white"}}>Total</th>
                     </tr>
                     <tr >
-                      {bulans.map(bulan => (
-                        <th key={bulan} style={{fontSize: "11px",textAlign: "center",backgroundColor: "black",color: "white"}}>{mapperBulan[bulan]}</th>
-                      ))}
+                    {arrbulan.map(bulan => (
+                      <th key={bulan} style={{ fontSize: "11px", textAlign: "center", backgroundColor: "black", color: "white" }}>
+                        {mapperBulan[bulan]}
+                      </th>
+                    ))}
                     </tr>
                     
                 </thead>
@@ -103,30 +114,14 @@ function App() {
 
                 <tbody>
                   <td colspan="14" style={{fontSize: "11px",backgroundColor: "#DCDCDC",fontWeight:"bold"}}>Makanan</td>
+                  
+                  
                   {menus.filter(menu=>mapperMenu["Makanan"].includes(menu))
                   .map(menu => (
-                    
-                    <tr key={menu}>
+                    <tr >
                       <td style={{fontSize: "11px",textAlign: "left"}}>{menu}</td>
                       {bulans.map(bulan => (
-                        <td style={{fontSize: "11px",textAlign: "right"}} key={bulan}>{pivot[bulan][menu] || 0}</td>
-                      ))}
-                      <td style={{fontSize: "11px",textAlign: "right",fontWeight:"bold"}}>
-                        {bulans.reduce(
-                          (subtotal, bulan) => subtotal + (pivot[bulan][menu] || 0),
-                          0
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  <td colspan="14" style={{fontSize: "11px",backgroundColor: "#DCDCDC",fontWeight:"bold"}}>Minuman</td>
-                  {menus.filter(menu=>mapperMenu["Minuman"].includes(menu))
-                  .map(menu => (
-                    
-                    <tr key={menu}>
-                      <td style={{fontSize: "11px",textAlign: "left"}}>{menu}</td>
-                      {bulans.map(bulan => (
-                        <td style={{fontSize: "11px",textAlign: "right"}} key={bulan}>{pivot[bulan][menu] || 0}</td>
+                        <td style={{fontSize: "11px",textAlign: "right"}} key={bulan}>{pivot[bulan][menu] || null}</td>
                       ))}
                       <td style={{fontSize: "11px",textAlign: "right",fontWeight:"bold"}}>
                         {bulans.reduce(
@@ -138,13 +133,81 @@ function App() {
                   ))}
 
                   <tr>
+                    <td style={{fontSize: "11px",backgroundColor: "black",color: "white",fontWeight:"bold"}}>Subtotal Makanan</td>
+                    
+                    {bulans.map(bulan => (
+                      <td key={bulan} style={{fontSize: "11px",textAlign: "right", backgroundColor: "black",color: "white",fontWeight:"bold"}}>
+                      {menus.filter(menu=>mapperMenu["Makanan"].includes(menu)).reduce(
+                        (subtotal, menu) => subtotal + (pivot[bulan][menu] || 0),
+                        0
+                      )||null}
+                    </td>
+                    ))}
+                    
+                    {/* grand total */}
+                    <td style={{fontSize: "11px",textAlign: "right", backgroundColor: "black",color: "white",fontWeight:"bold"}}>
+                      {menus.filter(menu=>mapperMenu["Makanan"].includes(menu)).reduce(
+                        (grandTotal, menu) =>
+                          grandTotal +
+                          bulans.reduce(
+                            (subtotal, bulan) => subtotal + (pivot[bulan][menu] || 0),
+                            0
+                          ),
+                        0
+                      )}
+                    </td>
+                  </tr>
+                  <td colspan="14" style={{fontSize: "11px",backgroundColor: "#DCDCDC",fontWeight:"bold"}}>Minuman</td>
+                  {menus.filter(menu=>mapperMenu["Minuman"].includes(menu))
+                  .map(menu => (
+                    
+                    <tr key={menu}>
+                      <td style={{fontSize: "11px",textAlign: "left"}}>{menu}</td>
+                      {bulans.map(bulan => (
+                        <td style={{fontSize: "11px",textAlign: "right"}} key={bulan}>{pivot[bulan][menu] ||null}</td>
+                      ))}
+                      <td style={{fontSize: "11px",textAlign: "right",fontWeight:"bold"}}>
+                        {bulans.reduce(
+                          (subtotal, bulan) => subtotal + (pivot[bulan][menu] || 0),
+                          0
+                        )}
+                      </td>
+                      
+                    </tr>
+                  ))}
+                  <tr>
+                    <td style={{fontSize: "11px",backgroundColor: "black",color: "white",fontWeight:"bold"}}>Subtotal Minuman</td>
+                    
+                    {bulans.map(bulan => (
+                      <td class="text" key={bulan} style={{fontSize: "11px",textAlign: "right", backgroundColor: "black",color: "white",fontWeight:"bold"}}>
+                      {menus.filter(menu=>mapperMenu["Minuman"].includes(menu)).reduce(
+                        (subtotal, menu) => subtotal + (pivot[bulan][menu] || 0),
+                        0
+                      )||null}
+                    </td>
+                    ))}
+                    <td style={{fontSize: "11px",textAlign: "right", backgroundColor: "black",color: "white",fontWeight:"bold"}}>
+                      {menus.filter(menu=>mapperMenu["Makanan"].includes(menu)).reduce(
+                        (grandTotal, menu) =>
+                          grandTotal +
+                          bulans.reduce(
+                            (subtotal, bulan) => subtotal + (pivot[bulan][menu] || 0),
+                            0
+                          ),
+                        0
+                      )}
+                    </td>
+                  </tr>
+                  
+
+                  <tr>
                     <td style={{fontSize: "11px",backgroundColor: "black",color: "white",fontWeight:"bold"}}>Total</td>
                     {bulans.map(bulan => (
                       <td key={bulan} style={{fontSize: "11px",textAlign: "right", backgroundColor: "black",color: "white",fontWeight:"bold"}}>
                         {menus.reduce(
                           (subtotal, menu) => subtotal + (pivot[bulan][menu] || 0),
                           0
-                        )}
+                        )||null}
                       </td>
                     ))}
                     <td style={{fontSize: "11px",textAlign: "right", backgroundColor: "black",color: "white",fontWeight:"bold"}}>
@@ -164,7 +227,6 @@ function App() {
               </table>
             </div>
         </div>
-          {/* <h4>Venturo - Laporan penjualan tahunan per menu</h4> */}
           
         
         </div>
